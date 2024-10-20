@@ -594,21 +594,24 @@
     /* Stili per dispositivi mobili */
     @media (max-width: 767px) {
       .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-        overflow-y: visible;
-        padding: 10px;
-        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        height: 100%;
+        z-index: 1000;
+        transition: left 0.3s ease-in-out;
+        overflow-y: auto;
       }
 
       .sidebar.open {
-        transform: translateX(0);
+        left: 0;
       }
 
       .main-content {
         margin-left: 0;
-        padding: 10px;
+        padding-top: 60px;
+        /* Spazio per il pulsante hamburger */
       }
 
       .main-content.sidebar-open {
@@ -670,7 +673,6 @@
       }
 
       .hamburger-button {
-        display: block;
         position: fixed;
         top: 10px;
         left: 10px;
@@ -681,6 +683,30 @@
         font-size: 1.5em;
         padding: 5px 10px;
         border-radius: 4px;
+      }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .role-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .role-button {
+        margin-bottom: 10px;
       }
     }
 
@@ -2283,13 +2309,18 @@
 
     // Gestione del menu hamburger per dispositivi mobili
     const hamburgerButton = document.getElementById('hamburgerButton');
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    document.body.appendChild(overlay);
 
     function toggleSidebar() {
       sidebarElement.classList.toggle('open');
-      mainContent.classList.toggle('sidebar-open');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = sidebarElement.classList.contains('open') ? 'hidden' : '';
     }
 
     hamburgerButton.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
 
     // Chiudi sidebar dopo aver selezionato un'opzione su mobile
     document.querySelectorAll('.nav-buttons button').forEach(button => {
@@ -2300,20 +2331,17 @@
       });
     });
 
-    // Funzione per controllare la larghezza della finestra e mostrare/nascondere il pulsante hamburger
     function checkWindowSize() {
       if (window.innerWidth <= 767) {
         hamburgerButton.style.display = 'block';
-        sidebarElement.classList.remove('open');
-        mainContent.classList.remove('sidebar-open');
       } else {
         hamburgerButton.style.display = 'none';
         sidebarElement.classList.remove('open');
-        mainContent.classList.remove('sidebar-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
       }
     }
 
-    // Esegui il controllo all'avvio e quando la finestra viene ridimensionata
     window.addEventListener('resize', checkWindowSize);
     checkWindowSize();
   </script>
