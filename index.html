@@ -611,7 +611,6 @@
       .main-content {
         margin-left: 0;
         padding-top: 60px;
-        /* Spazio per il pulsante hamburger */
       }
 
       .main-content.sidebar-open {
@@ -641,11 +640,7 @@
       }
 
       .table-responsive {
-        overflow-x: auto;
-      }
-
-      table {
-        font-size: 0.9em;
+        display: none;
       }
 
       input,
@@ -708,6 +703,45 @@
       .role-button {
         margin-bottom: 10px;
       }
+
+      .mobile-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
+        padding: 16px;
+      }
+
+      .mobile-card-title {
+        color: #3498db;
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .mobile-card-content p {
+        margin: 8px 0;
+      }
+
+      .mobile-card-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+
+      .mobile-action-btn {
+        background-color: #3498db;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        margin-left: 8px;
+        padding: 8px 12px;
+      }
+
+      .mobile-cards {
+        display: block;
+      }
     }
 
     @media (min-width: 768px) {
@@ -715,61 +749,10 @@
         display: none;
       }
 
-      @media (max-width: 767px) {
-        .table-responsive {
-          overflow-x: visible;
-        }
-
-        .table-responsive table {
-          display: block;
-        }
-
-        .table-responsive table thead {
-          display: none;
-        }
-
-        .table-responsive table tbody,
-        .table-responsive table tr,
-        .table-responsive table td {
-          display: block;
-        }
-
-        .table-responsive table tr {
-          margin-bottom: 15px;
-          background-color: #f8f9fa;
-          border: 1px solid #dee2e6;
-          border-radius: 8px;
-          padding: 10px;
-        }
-
-        .table-responsive table td {
-          text-align: left;
-          padding: 8px 5px;
-          position: relative;
-          padding-left: 50%;
-        }
-
-        .table-responsive table td:before {
-          content: attr(data-label);
-          position: absolute;
-          left: 5px;
-          width: 45%;
-          padding-right: 10px;
-          white-space: nowrap;
-          font-weight: bold;
-        }
-
-        .azioni-intervento {
-          display: flex;
-          justify-content: flex-start;
-          flex-wrap: wrap;
-          gap: 5px;
-        }
-
-        .azioni-intervento button {
-          flex: 1 0 auto;
-        }
+      .mobile-cards {
+        display: none;
       }
+    }
   </style>
 </head>
 
@@ -873,6 +856,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="mobile-cards"></div>
     </div>
 
     <div class="container" id="interventiInCorso" style="display: none">
@@ -892,6 +876,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="mobile-cards"></div>
     </div>
 
     <div class="container" id="interventiCompletati" style="display: none">
@@ -911,6 +896,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="mobile-cards"></div>
     </div>
 
     <div class="container" id="rubrica" style="display: none">
@@ -931,6 +917,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="mobile-cards"></div>
     </div>
 
     <div class="container" id="cestino" style="display: none">
@@ -951,6 +938,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div class="mobile-cards"></div>
     </div>
 
     <div class="container" id="listaNote" style="display: none">
@@ -1020,13 +1008,12 @@
           <div class="role-buttons">
             <button type="button" class="role-button" data-role="AMMINISTRATORE">
               AMMINISTRATORE
-            </button>
-            <button type="button" class="role-button" data-role="ALTRO">
-              ALTRO
-            </button>
-            <button type="button" class="role-button" data-role="CONDOMINE INTERNO">
-              CONDOMINE INTERNO
-            </button>
+              <button type="button" class="role-button" data-role="ALTRO">
+                ALTRO
+              </button>
+              <button type="button" class="role-button" data-role="CONDOMINE INTERNO">
+                CONDOMINE INTERNO
+              </button>
           </div>
           <input type="hidden" id="ruoloSelezionato" name="ruolo" required />
         </div>
@@ -1099,7 +1086,7 @@
   <div id="toast"></div>
 
   <div class="copyright">
-    Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024 v3.1d
+    Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024 v3.2_beta
   </div>
 
   <script>
@@ -1667,7 +1654,6 @@
       const oraFormattata = oraInput ? oraInput.substring(0, 5) : "N/D";
 
       const appuntamento = `${dataFormattata} ${oraFormattata}`;
-
       const interventoInCorso = {
         cliente: clienteSelezionato.cells[0].textContent,
         indirizzo: clienteSelezionato.cells[1].textContent,
@@ -2399,6 +2385,129 @@
 
     window.addEventListener('resize', checkWindowSize);
     checkWindowSize();
+
+    // Funzione per creare le card mobili
+    function creaCardMobile(intervento, tipo) {
+      return `
+        <div class="mobile-card">
+          <h2 class="mobile-card-title">${intervento.cliente}</h2>
+          <div class="mobile-card-content">
+            <p><strong>Indirizzo:</strong> ${intervento.indirizzo}</p>
+            <p><strong>Titolo:</strong> ${intervento.titolo}</p>
+            <p><strong>Tipo Intervento:</strong> ${intervento.tipoIntervento}</p>
+            ${tipo !== "daPianificare" ? `<p><strong>Appuntamento:</strong> ${intervento.appuntamento || 'N/D'}</p>` : ''}
+          </div>
+          <div class="mobile-card-actions">
+            ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="mobile-action-btn"><i class="fas fa-pencil-alt"></i></button>' : ""}
+            ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="mobile-action-btn"><i class="fas fa-calendar-plus"></i></button>' : ""}
+            ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="mobile-action-btn">Collaudo</button>' : ""}
+            ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="mobile-action-btn"><i class="fas fa-file-pdf"></i></button>' : ""}
+            ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="mobile-action-btn"><i class="fas fa-trash-alt"></i></button>' : ""}
+            ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="mobile-action-btn">Ripristina</button>' : ""}
+            ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="mobile-action-btn"><i class="fas fa-trash"></i></button>' : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    // Modifica le funzioni di aggiornamento per includere le card mobili
+    function aggiornaListaClientiDaPianificare() {
+      const mobileCards = listaClienti.querySelector('.mobile-cards');
+      mobileCards.innerHTML = '';
+      Array.from(tabellaClienti.rows).forEach(row => {
+        const intervento = {
+          cliente: row.cells[0].textContent,
+          indirizzo: row.cells[1].textContent,
+          titolo: row.cells[2].textContent,
+          tipoIntervento: row.cells[3].textContent,
+          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
+        };
+        mobileCards.innerHTML += creaCardMobile(intervento, "daPianificare");
+      });
+    }
+
+    function aggiornaInterventiInCorso() {
+      const mobileCards = interventiInCorso.querySelector('.mobile-cards');
+      mobileCards.innerHTML = '';
+      Array.from(tabellaInterventiInCorso.rows).forEach(row => {
+        const intervento = {
+          cliente: row.cells[0].textContent,
+          indirizzo: row.cells[1].textContent,
+          titolo: row.cells[2].textContent,
+          tipoIntervento: row.cells[3].textContent,
+          appuntamento: row.cells[4].textContent,
+          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
+        };
+        mobileCards.innerHTML += creaCardMobile(intervento, "inCorso");
+      });
+    }
+
+    function aggiornaInterventiCompletati() {
+      const mobileCards = interventiCompletati.querySelector('.mobile-cards');
+      mobileCards.innerHTML = '';
+      Array.from(tabellaInterventiCompletati.rows).forEach(row => {
+        const intervento = {
+          cliente: row.cells[0].textContent,
+          indirizzo: row.cells[1].textContent,
+          titolo: row.cells[2].textContent,
+          tipoIntervento: row.cells[3].textContent,
+          appuntamento: row.cells[4].textContent,
+          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
+          collaudoUrl: row.dataset.collaudoUrl,
+        };
+        mobileCards.innerHTML += creaCardMobile(intervento, "completati");
+      });
+    }
+
+    function aggiornaRubrica() {
+      const mobileCards = rubrica.querySelector('.mobile-cards');
+      mobileCards.innerHTML = '';
+      Array.from(tabellaRubrica.rows).forEach(row => {
+        const contatto = {
+          cliente: row.cells[0].textContent,
+          indirizzo: row.cells[1].textContent,
+          titolo: row.cells[2].textContent,
+          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
+        };
+        mobileCards.innerHTML += creaCardMobile(contatto, "rubrica");
+      });
+    }
+
+    // Assicurati che le funzioni come apriModalModifica e eliminaIntervento funzionino sia per le righe della tabella che per le card mobili
+    function apriModalModifica(element) {
+      const isCard = element.closest('.mobile-card');
+      let cliente, indirizzo, titolo, tipoIntervento, priorita;
+
+      if (isCard) {
+        const card = element.closest('.mobile-card');
+        cliente = card.querySelector('.mobile-card-title').textContent;
+        const content = card.querySelector('.mobile-card-content');
+        indirizzo = content.children[0].textContent.split(': ')[1];
+        titolo = content.children[1].textContent.split(': ')[1];
+        tipoIntervento = content.children[2].textContent.split(': ')[1];
+        priorita = card.style.borderColor;
+      } else {
+        const row = element.closest('tr');
+        cliente = row.cells[0].textContent;
+        indirizzo = row.cells[1].textContent;
+        titolo = row.cells[2].textContent;
+        tipoIntervento = row.cells[3].textContent;
+        priorita = row.cells[0].querySelector("div")?.style.backgroundColor || "";
+      }
+
+      // Popola il form di modifica con i dati
+      document.getElementById('modCliente').value = cliente;
+      document.getElementById('modIndirizzo').value = indirizzo;
+      document.getElementById('modTitolo').value = titolo;
+      document.getElementById('modTipoIntervento').value = tipoIntervento;
+      document.getElementById('modPriorita').value = priorita;
+
+      // Mostra il modal di modifica
+      document.getElementById('modalModifica').style.display = 'block';
+    }
+
+    // Aggiorna le altre funzioni (eliminaIntervento, pianificaAppuntamento, etc.) in modo simile
+
   </script>
 </body>
 
