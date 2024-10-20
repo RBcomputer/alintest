@@ -53,6 +53,12 @@
       top: 0;
       overflow-y: auto;
       padding: 20px;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
     }
 
     .sidebar h1 {
@@ -677,160 +683,197 @@
     }
 
     /* Stili per la versione mobile */
-    @media screen and (max-width: 768px) {
-      body {
-        font-size: 16px;
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: -250px;
-        width: 250px;
-        height: 100%;
-        z-index: 1000;
-        transition: left 0.3s ease;
-        overflow-y: auto;
-      }
-
-      .sidebar:target {
-        left: 0;
-      }
-
-      .main-content {
-        margin-left: 0;
-        padding: 10px;
-        margin-top: 60px;
-        /* Aumentato lo spazio per l'header mobile */
-      }
-
-      .container {
-        padding: 15px;
-      }
-
-      /* Stile per le schede degli interventi */
-      #tabellaInterventiInCorso,
-      #tabellaCestino,
-      #tabellaRubrica,
-      #tabellaClienti,
-      #tabellaInterventiCompletati {
-        display: block;
-      }
-
-      #tabellaInterventiInCorso thead,
-      #tabellaCestino thead,
-      #tabellaRubrica thead,
-      #tabellaClienti thead,
-      #tabellaInterventiCompletati thead {
+    @media screen and (min-width: 769px) {
+      .mobile-label {
         display: none;
       }
+    }
 
-      #tabellaInterventiInCorso tr,
-      #tabellaCestino tr,
-      #tabellaRubrica tr,
-      #tabellaClienti tr,
-      #tabellaInterventiCompletati tr {
-        display: block;
-        margin-bottom: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 15px;
-      }
-
-      #tabellaInterventiInCorso td,
-      #tabellaCestino td,
-      #tabellaRubrica td,
-      #tabellaClienti td,
-      #tabellaInterventiCompletati td {
-        display: flex;
-        padding: 10px 0;
-        border: none;
-        align-items: center;
-      }
-
-      #tabellaInterventiInCorso td::before,
-      #tabellaCestino td::before,
-      #tabellaRubrica td::before,
-      #tabellaClienti td::before,
-      #tabellaInterventiCompletati td::before {
-        content: attr(data-label);
+    @media screen and (max-width: 768px) {
+      .mobile-label {
         font-weight: bold;
-        width: 40%;
-        min-width: 120px;
-        color: #3498db;
+        display: inline-block;
+        width: 100px;
         margin-right: 10px;
       }
 
-      .azioni-intervento {
-        justify-content: flex-end;
-        display: flex;
-        margin-top: 15px;
-        flex-wrap: wrap;
+      td {
+        display: block;
+        text-align: left;
+        padding: 5px 10px;
       }
 
-      .azioni-intervento button {
-        margin: 5px;
+      tr {
+        margin-bottom: 20px;
+        display: block;
+        border: 1px solid #ddd;
       }
 
-      /* Stile per l'header mobile */
-      .mobile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #3498db;
-        color: white;
-        padding: 15px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 999;
-      }
-
-      .mobile-header h1 {
-        font-size: 1.2em;
-        margin: 0;
-      }
-
-      .mobile-menu-button,
-      .mobile-menu-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5em;
-        text-decoration: none;
-      }
-
-      /* Overlay per chiudere il menu cliccando fuori */
-      .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-      }
-
-      .sidebar:target~.overlay {
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
         display: block;
       }
 
-      /* Adattamenti per il calendario */
-      .calendario-body {
-        flex-direction: column;
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
       }
+    }
 
-      #calendario {
-        width: 100%;
-      }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      z-index: 1000;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+    }
 
-      #eventiGiorno {
-        width: 100%;
-        margin-top: 20px;
-      }
+    .sidebar:target {
+      left: 0;
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 10px;
+      margin-top: 60px;
+      /* Aumentato lo spazio per l'header mobile */
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    /* Stile per le schede degli interventi */
+    #tabellaInterventiInCorso,
+    #tabellaCestino,
+    #tabellaRubrica,
+    #tabellaClienti,
+    #tabellaInterventiCompletati {
+      display: block;
+    }
+
+    #tabellaInterventiInCorso thead,
+    #tabellaCestino thead,
+    #tabellaRubrica thead,
+    #tabellaClienti thead,
+    #tabellaInterventiCompletati thead {
+      display: none;
+    }
+
+    #tabellaInterventiInCorso tr,
+    #tabellaCestino tr,
+    #tabellaRubrica tr,
+    #tabellaClienti tr,
+    #tabellaInterventiCompletati tr {
+      display: block;
+      margin-bottom: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+
+    #tabellaInterventiInCorso td,
+    #tabellaCestino td,
+    #tabellaRubrica td,
+    #tabellaClienti td,
+    #tabellaInterventiCompletati td {
+      display: flex;
+      padding: 10px 0;
+      border: none;
+      align-items: center;
+    }
+
+    #tabellaInterventiInCorso td::before,
+    #tabellaCestino td::before,
+    #tabellaRubrica td::before,
+    #tabellaClienti td::before,
+    #tabellaInterventiCompletati td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      width: 40%;
+      min-width: 120px;
+      color: #3498db;
+      margin-right: 10px;
+    }
+
+    .azioni-intervento {
+      justify-content: flex-end;
+      display: flex;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .azioni-intervento button {
+      margin: 5px;
+    }
+
+    /* Stile per l'header mobile */
+    .mobile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #3498db;
+      color: white;
+      padding: 15px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+    }
+
+    .mobile-header h1 {
+      font-size: 1.2em;
+      margin: 0;
+    }
+
+    .mobile-menu-button,
+    .mobile-menu-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      text-decoration: none;
+    }
+
+    /* Overlay per chiudere il menu cliccando fuori */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .sidebar:target~.overlay {
+      display: block;
+    }
+
+    /* Adattamenti per il calendario */
+    .calendario-body {
+      flex-direction: column;
+    }
+
+    #calendario {
+      width: 100%;
+    }
+
+    #eventiGiorno {
+      width: 100%;
+      margin-top: 20px;
+    }
     }
   </style>
 </head>
@@ -1640,23 +1683,23 @@
   function aggiungiRigaTabella(tabella, intervento, tipo) {
     const newRow = tabella.insertRow();
     newRow.innerHTML = `
-        <td>${intervento.cliente}</td>
-        <td>${intervento.indirizzo}</td>
-        <td>${intervento.titolo}</td>
-        <td>${intervento.tipoIntervento}</td>
-        ${tipo !== "daPianificare" ? `<td>${intervento.appuntamento || ""}</td>` : ""}
-        <td>
-          <div class="azioni-intervento">
-            ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>' : ""}
-            ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>' : ""}
-            ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
-            ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i></button>' : ""}
-            ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i></button>' : ""}
-          </div>
-        </td>
-      `;
+    <td><span class="mobile-label">Cliente:</span> ${intervento.cliente}</td>
+    <td><span class="mobile-label">Indirizzo:</span> ${intervento.indirizzo}</td>
+    <td><span class="mobile-label">Titolo:</span> ${intervento.titolo}</td>
+    <td><span class="mobile-label">Tipo Intervento:</span> ${intervento.tipoIntervento}</td>
+    ${tipo !== "daPianificare" ? `<td><span class="mobile-label">Appuntamento:</span> ${intervento.appuntamento || ""}</td>` : ""}
+    <td>
+      <div class="azioni-intervento">
+        ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>' : ""}
+        ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>' : ""}
+        ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
+        ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i></button>' : ""}
+        ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i></button>' : ""}
+      </div>
+    </td>
+  `;
 
     // Aggiungi l'URL del collaudo come attributo data alla riga
     if (intervento.collaudoUrl) {
@@ -1852,6 +1895,40 @@
       isDrawing = false;
       ctxCollaudo.beginPath();
     }
+
+    function chiudiMenu() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.remove('active');
+      document.removeEventListener('click', chiudiMenuFuori);
+    }
+
+    function apriMenu() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.add('active');
+      setTimeout(() => {
+        document.addEventListener('click', chiudiMenuFuori);
+      }, 0);
+    }
+
+    function chiudiMenuFuori(event) {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar.contains(event.target) && !event.target.matches('.mobile-menu-button')) {
+        chiudiMenu();
+      }
+    }
+
+    document.querySelector('.mobile-menu-button').addEventListener('click', (event) => {
+      event.stopPropagation();
+      apriMenu();
+    });
+
+    document.querySelectorAll('.nav-buttons button').forEach(button => {
+      button.addEventListener('click', () => {
+
+        // Chiudi il menu
+        chiudiMenu();
+      });
+    });
 
     // Salva i dati per essere usati quando si genera il PDF
     window.datiCollaudo = {
