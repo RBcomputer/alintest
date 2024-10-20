@@ -1638,8 +1638,20 @@
     });
 
     // Funzioni per la gestione degli appuntamenti
+    function aggiungiCardMobile(container, intervento, tipo) {
+      const card = document.createElement('div');
+      card.className = 'mobile-card';
+      card.innerHTML = creaCardMobile(intervento, tipo);
+      container.appendChild(card);
+    }
+
     function pianificaAppuntamento(button) {
-      clienteSelezionato = button.closest("tr");
+      const isMobile = button.closest('.mobile-card') !== null;
+      if (isMobile) {
+        clienteSelezionato = button.closest('.mobile-card');
+      } else {
+        clienteSelezionato = button.closest("tr");
+      }
       document.getElementById("modalAppuntamento").style.display = "block";
     }
 
@@ -1654,16 +1666,33 @@
       const oraFormattata = oraInput ? oraInput.substring(0, 5) : "N/D";
 
       const appuntamento = `${dataFormattata} ${oraFormattata}`;
-      const interventoInCorso = {
-        cliente: clienteSelezionato.cells[0].textContent,
-        indirizzo: clienteSelezionato.cells[1].textContent,
-        titolo: clienteSelezionato.cells[2].textContent,
-        tipoIntervento: clienteSelezionato.cells[3].textContent,
-        appuntamento: appuntamento,
-        priorita: clienteSelezionato.cells[0].querySelector("div")?.style.backgroundColor || "",
-      };
+
+      const isMobile = clienteSelezionato.classList.contains('mobile-card');
+      let interventoInCorso;
+
+      if (isMobile) {
+        const content = clienteSelezionato.querySelector('.mobile-card-content');
+        interventoInCorso = {
+          cliente: clienteSelezionato.querySelector('.mobile-card-title').textContent,
+          indirizzo: content.children[0].textContent.split(': ')[1],
+          titolo: content.children[1].textContent.split(': ')[1],
+          tipoIntervento: content.children[2].textContent.split(': ')[1],
+          appuntamento: appuntamento,
+          priorita: clienteSelezionato.style.borderColor || "",
+        };
+      } else {
+        interventoInCorso = {
+          cliente: clienteSelezionato.cells[0].textContent,
+          indirizzo: clienteSelezionato.cells[1].textContent,
+          titolo: clienteSelezionato.cells[2].textContent,
+          tipoIntervento: clienteSelezionato.cells[3].textContent,
+          appuntamento: appuntamento,
+          priorita: clienteSelezionato.cells[0].querySelector("div")?.style.backgroundColor || "",
+        };
+      }
 
       aggiungiRigaTabella(tabellaInterventiInCorso, interventoInCorso, "inCorso");
+      aggiungiCardMobile(interventiInCorso.querySelector('.mobile-cards'), interventoInCorso, "inCorso");
 
       clienteSelezionato.remove();
       document.getElementById("modalAppuntamento").style.display = "none";
@@ -2389,25 +2418,25 @@
     // Funzione per creare le card mobili
     function creaCardMobile(intervento, tipo) {
       return `
-        <div class="mobile-card">
-          <h2 class="mobile-card-title">${intervento.cliente}</h2>
-          <div class="mobile-card-content">
-            <p><strong>Indirizzo:</strong> ${intervento.indirizzo}</p>
-            <p><strong>Titolo:</strong> ${intervento.titolo}</p>
-            <p><strong>Tipo Intervento:</strong> ${intervento.tipoIntervento}</p>
-            ${tipo !== "daPianificare" ? `<p><strong>Appuntamento:</strong> ${intervento.appuntamento || 'N/D'}</p>` : ''}
-          </div>
-          <div class="mobile-card-actions">
-            ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="mobile-action-btn"><i class="fas fa-pencil-alt"></i></button>' : ""}
-            ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="mobile-action-btn"><i class="fas fa-calendar-plus"></i></button>' : ""}
-            ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="mobile-action-btn">Collaudo</button>' : ""}
-            ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="mobile-action-btn"><i class="fas fa-file-pdf"></i></button>' : ""}
-            ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="mobile-action-btn"><i class="fas fa-trash-alt"></i></button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="mobile-action-btn">Ripristina</button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="mobile-action-btn"><i class="fas fa-trash"></i></button>' : ""}
-          </div>
+        <div class="mobile-card" data-cliente="${intervento.cliente}">
+            <h2 class="mobile-card-title">${intervento.cliente}</h2>
+            <div class="mobile-card-content">
+                <p><strong>Indirizzo:</strong> ${intervento.indirizzo}</p>
+                <p><strong>Titolo:</strong> ${intervento.titolo}</p>
+                <p><strong>Tipo Intervento:</strong> ${intervento.tipoIntervento}</p>
+                ${tipo !== "daPianificare" ? `<p><strong>Appuntamento:</strong> ${intervento.appuntamento || 'N/D'}</p>` : ''}
+            </div>
+            <div class="mobile-card-actions">
+                ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="mobile-action-btn"><i class="fas fa-pencil-alt"></i></button>' : ""}
+                ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="mobile-action-btn"><i class="fas fa-calendar-plus"></i></button>' : ""}
+                ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="mobile-action-btn">Collaudo</button>' : ""}
+                ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="mobile-action-btn"><i class="fas fa-file-pdf"></i></button>' : ""}
+                ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="mobile-action-btn"><i class="fas fa-trash-alt"></i></button>' : ""}
+                ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="mobile-action-btn">Ripristina</button>' : ""}
+                ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="mobile-action-btn"><i class="fas fa-trash"></i></button>' : ""}
+            </div>
         </div>
-      `;
+    `;
     }
 
     // Modifica le funzioni di aggiornamento per includere le card mobili
