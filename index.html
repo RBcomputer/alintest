@@ -53,12 +53,6 @@
       top: 0;
       overflow-y: auto;
       padding: 20px;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .sidebar.active {
-      transform: translateX(0);
     }
 
     .sidebar h1 {
@@ -683,13 +677,11 @@
     }
 
     /* Stili per la versione mobile */
-    @media screen and (min-width: 769px) {
-      .mobile-label {
-        display: none;
-      }
-    }
-
     @media screen and (max-width: 768px) {
+      body {
+        font-size: 16px;
+      }
+
       .mobile-label {
         font-weight: bold;
         display: inline-block;
@@ -722,6 +714,12 @@
         position: absolute;
         top: -9999px;
         left: -9999px;
+      }
+    }
+
+    @media screen and (min-width: 769px) {
+      .mobile-label {
+        display: none;
       }
     }
 
@@ -1211,7 +1209,7 @@
   <div id="toast"></div>
 
   <div class="copyright">
-    Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024 vbeta0.1.0
+    Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024 v3.1d
   </div>
 
   <script>
@@ -1895,40 +1893,6 @@
       isDrawing = false;
       ctxCollaudo.beginPath();
     }
-
-    function chiudiMenu() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.remove('active');
-      document.removeEventListener('click', chiudiMenuFuori);
-    }
-
-    function apriMenu() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.add('active');
-      setTimeout(() => {
-        document.addEventListener('click', chiudiMenuFuori);
-      }, 0);
-    }
-
-    function chiudiMenuFuori(event) {
-      const sidebar = document.getElementById('sidebar');
-      if (!sidebar.contains(event.target) && !event.target.matches('.mobile-menu-button')) {
-        chiudiMenu();
-      }
-    }
-
-    document.querySelector('.mobile-menu-button').addEventListener('click', (event) => {
-      event.stopPropagation();
-      apriMenu();
-    });
-
-    document.querySelectorAll('.nav-buttons button').forEach(button => {
-      button.addEventListener('click', () => {
-
-        // Chiudi il menu
-        chiudiMenu();
-      });
-    });
 
     // Salva i dati per essere usati quando si genera il PDF
     window.datiCollaudo = {
