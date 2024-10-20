@@ -714,7 +714,62 @@
       .hamburger-button {
         display: none;
       }
-    }
+
+      @media (max-width: 767px) {
+        .table-responsive {
+          overflow-x: visible;
+        }
+
+        .table-responsive table {
+          display: block;
+        }
+
+        .table-responsive table thead {
+          display: none;
+        }
+
+        .table-responsive table tbody,
+        .table-responsive table tr,
+        .table-responsive table td {
+          display: block;
+        }
+
+        .table-responsive table tr {
+          margin-bottom: 15px;
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          padding: 10px;
+        }
+
+        .table-responsive table td {
+          text-align: left;
+          padding: 8px 5px;
+          position: relative;
+          padding-left: 50%;
+        }
+
+        .table-responsive table td:before {
+          content: attr(data-label);
+          position: absolute;
+          left: 5px;
+          width: 45%;
+          padding-right: 10px;
+          white-space: nowrap;
+          font-weight: bold;
+        }
+
+        .azioni-intervento {
+          display: flex;
+          justify-content: flex-start;
+          flex-wrap: wrap;
+          gap: 5px;
+        }
+
+        .azioni-intervento button {
+          flex: 1 0 auto;
+        }
+      }
   </style>
 </head>
 
@@ -1510,23 +1565,23 @@
     function aggiungiRigaTabella(tabella, intervento, tipo) {
       const newRow = tabella.insertRow();
       newRow.innerHTML = `
-        <td>${intervento.cliente}</td>
-        <td>${intervento.indirizzo}</td>
-        <td>${intervento.titolo}</td>
-        <td>${intervento.tipoIntervento}</td>
-        ${tipo !== "daPianificare" ? `<td>${intervento.appuntamento || ""}</td>` : ""}
-        <td>
-          <div class="azioni-intervento">
-            ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>' : ""}
-            ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>' : ""}
-            ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
-            ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i></button>' : ""}
-            ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i></button>' : ""}
-          </div>
-        </td>
-      `;
+    <td data-label="Cliente">${intervento.cliente}</td>
+    <td data-label="Indirizzo">${intervento.indirizzo}</td>
+    <td data-label="Titolo">${intervento.titolo}</td>
+    <td data-label="Tipo Intervento">${intervento.tipoIntervento}</td>
+    ${tipo !== "daPianificare" ? `<td data-label="Appuntamento">${intervento.appuntamento || ""}</td>` : ""}
+    <td data-label="Azioni">
+      <div class="azioni-intervento">
+        ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i> Modifica</button>' : ""}
+        ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i> Pianifica</button>' : ""}
+        ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
+        ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i> PDF</button>' : ""}
+        ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i> Elimina</button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i> Elimina</button>' : ""}
+      </div>
+    </td>
+  `;
 
       // Aggiungi l'URL del collaudo come attributo data alla riga
       if (intervento.collaudoUrl) {
@@ -1550,17 +1605,17 @@
     function aggiungiRigaRubrica(contatto) {
       const newRow = tabellaRubrica.insertRow();
       newRow.innerHTML = `
-        <td>${contatto.cliente}</td>
-        <td>${contatto.indirizzo}</td>
-        <td>${contatto.titolo}</td>
-        <td>
-          <div class="azioni-intervento">
-            <button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>
-            <button onclick="pianificaInterventoRubrica(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>
-            <button onclick="eliminaContattoRubrica(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>
-          </div>
-        </td>
-      `;
+    <td data-label="Cliente">${contatto.cliente}</td>
+    <td data-label="Indirizzo">${contatto.indirizzo}</td>
+    <td data-label="Titolo">${contatto.titolo}</td>
+    <td data-label="Azioni">
+      <div class="azioni-intervento">
+        <button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i> Modifica</button>
+        <button onclick="pianificaInterventoRubrica(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i> Pianifica</button>
+        <button onclick="eliminaContattoRubrica(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i> Elimina</button>
+      </div>
+    </td>
+  `;
 
       // Aggiungi l'indicatore di priorità se presente
       if (contatto.priorita) {
