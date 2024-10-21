@@ -747,8 +747,16 @@
     }
 
     .mobile .sidebar {
-      transition: transform 0.3s ease-in-out;
       transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      height: calc(100vh - 50px);
+      width: 80%;
+      max-width: 300px;
+      z-index: 1000;
+      padding-top: 10px;
     }
 
     .mobile .sidebar.open {
@@ -756,7 +764,10 @@
     }
 
     .mobile .main-content {
-      transition: margin-left 0.3s ease-in-out;
+      margin-left: 0;
+      padding: 10px;
+      padding-top: 60px;
+      transition: none;
     }
 
     .mobile .sidebar.open+.main-content {
@@ -1328,7 +1339,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta0.2.3 me sò rotto er cazzo
+    vbeta0.2.5
   </div>
 
   <script>
@@ -2603,21 +2614,18 @@
         sidebar.classList.toggle('open');
       });
 
-      // Chiudi il menu quando si clicca su un elemento della sidebar
       sidebar.addEventListener('click', function (e) {
         if (e.target.tagName === 'BUTTON') {
           sidebar.classList.remove('open');
         }
       });
 
-      // Chiudi il menu quando si clicca fuori dalla sidebar
       document.addEventListener('click', function (e) {
         if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
           sidebar.classList.remove('open');
         }
       });
 
-      // Previeni la chiusura del menu quando si clicca all'interno della sidebar
       sidebar.addEventListener('click', function (e) {
         e.stopPropagation();
       });
