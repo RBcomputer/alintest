@@ -613,6 +613,30 @@
       z-index: 2000;
     }
 
+    /* Nasconde la barra copyright quando il login non è attivo */
+    body:not(.login-active) .copyright {
+      display: none;
+    }
+
+    /* Versione mobile */
+    @media (max-width: 768px) {
+
+      /* Mostra la barra copyright solo durante il login */
+      .login-container~.copyright {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+      }
+
+      /* Nasconde la barra copyright quando il contenuto principale è visibile */
+      .main-content:not(.hidden)~.copyright,
+      .sidebar:not(.hidden)~.copyright {
+        display: none;
+      }
+    }
+
     body.login-active .copyright {
       position: fixed;
       bottom: 0;
@@ -1299,7 +1323,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta0.2.2
+    vbeta0.2.1
   </div>
 
   <script>
