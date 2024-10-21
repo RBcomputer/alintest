@@ -746,17 +746,64 @@
       background-color: #27ae60;
     }
 
+    .mobile-header {
+      display: none;
+      background-color: var(--primary-color);
+      padding: 10px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1001;
+    }
+
+    .mobile .mobile-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .mobile-header h1 {
+      color: white;
+      margin: 0;
+      font-size: 1.2em;
+      margin-left: 15px;
+    }
+
+    #menuToggle {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 30px;
+      height: 25px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 10;
+    }
+
+    #menuToggle span {
+      width: 30px;
+      height: 3px;
+      background: white;
+      border-radius: 10px;
+      transition: all 0.3s linear;
+      position: relative;
+      transform-origin: 1px;
+    }
+
     .mobile .sidebar {
       transform: translateX(-100%);
       transition: transform 0.3s ease-in-out;
       position: fixed;
-      top: 50px;
+      top: 0;
       left: 0;
-      height: calc(100vh - 50px);
+      height: 100%;
       width: 80%;
       max-width: 300px;
       z-index: 1000;
-      padding-top: 10px;
+      padding-top: 60px;
+      overflow-y: auto;
     }
 
     .mobile .sidebar.open {
@@ -767,11 +814,26 @@
       margin-left: 0;
       padding: 10px;
       padding-top: 60px;
-      transition: none;
+      transition: transform 0.3s ease-in-out;
     }
 
-    .mobile .sidebar.open+.main-content {
-      margin-left: var(--sidebar-width);
+    .mobile .main-content.sidebar-open {
+      transform: translateX(80%);
+    }
+
+    .mobile .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .mobile .overlay.active {
+      display: block;
     }
 
     /* Stili generali per mobile */
@@ -1339,7 +1401,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta0.2.5
+    vbeta0.2.6
   </div>
 
   <script>
