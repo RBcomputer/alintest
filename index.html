@@ -630,6 +630,7 @@
       background-color: #f9f9f9;
       border-radius: 10px;
       padding: 30px;
+      position: relative;
     }
 
     .modal-collaudo h2 {
@@ -919,6 +920,47 @@
       margin: 0;
       font-size: 1.2em;
     }
+
+    /* Nuove modifiche */
+    .close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-top: 60px;
+        /* Altezza dell'header mobile */
+      }
+
+      .container {
+        margin-top: 20px;
+      }
+
+      .modal-content {
+        margin-top: 70px;
+      }
+
+      .modal-collaudo {
+        margin-top: 70px;
+      }
+
+      .mobile .sidebar {
+        top: 60px;
+        /* Altezza dell'header mobile */
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+      }
+
+      #modalCollaudo .modal-content {
+        margin-top: 70px;
+      }
+    }
   </style>
 </head>
 
@@ -1149,6 +1191,7 @@
 
   <div id="modalCollaudo" class="modal">
     <div class="modal-content modal-collaudo">
+      <button id="chiudiCollaudo" class="close-btn">&times;</button>
       <h2>Attestazione di Collaudo</h2>
       <form id="collaudoForm" class="collaudo-form">
         <div class="form-group">
