@@ -477,19 +477,17 @@
     }
 
     .calendario-body {
-      display: flex;
-      gap: 20px;
+      display: block;
     }
 
     #calendario {
-      flex: 2;
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
     }
 
     #eventiGiorno {
-      flex: 1;
+      margin-top: 20px;
       background-color: #f0f0f0;
       padding: 10px;
       border-radius: 5px;
@@ -862,6 +860,29 @@
       max-width: none;
       margin: 20px auto;
     }
+
+    #modalAppuntamento .modal-content {
+      margin-top: 60px;
+    }
+
+    .mobile .calendario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .mobile .calendario-header button {
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    .mobile .calendario-header h2 {
+      margin: 0;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 
@@ -1071,10 +1092,10 @@
       </div>
       <div class="calendario-body">
         <div id="calendario"></div>
-        <div id="eventiGiorno">
-          <h3 id="dataSelezionata"></h3>
-          <ul id="listaEventiGiorno"></ul>
-        </div>
+      </div>
+      <div id="eventiGiorno">
+        <h3 id="dataSelezionata"></h3>
+        <ul id="listaEventiGiorno"></ul>
       </div>
     </div>
   </div>
@@ -1199,7 +1220,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta
+    vbeta21.10
   </div>
 
   <script>
