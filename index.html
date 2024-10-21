@@ -2091,11 +2091,21 @@
         confermaFirmaCollaudo.addEventListener("click", function () {
             console.log("Funzione confermaFirmaCollaudo chiamata");
 
+            const areaFirmaCollaudo = document.getElementById("areaFirmaCollaudo");
+            const ctx = areaFirmaCollaudo.getContext("2d");
+
+            // Controlla se l'area di firma è vuota
+            const isFirmaVuota = ctx.getImageData(0, 0, areaFirmaCollaudo.width, areaFirmaCollaudo.height).data.every(channel => channel === 0 || channel === 255);
+
+            if (isFirmaVuota) {
+                showErrorToast("Per favore, firma prima di continuare.");
+                return;
+            }
+
             const LOGO1_URL = "https://i.imgur.com/9lxevm7.png";
             const LOGO2_URL = "https://i.imgur.com/Oih79Ss.jpg";
             const FIRMA_ALIN_URL = "https://i.imgur.com/4aL0pnx.jpg";
 
-            const areaFirmaCollaudo = document.getElementById("areaFirmaCollaudo");
             const firmaImage = areaFirmaCollaudo.toDataURL("image/png");
 
             const pdf = new jsPDF();
