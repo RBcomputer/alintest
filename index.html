@@ -1401,7 +1401,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta0.2.7
+    vbeta0.2.8
   </div>
 
   <script>
@@ -1540,10 +1540,8 @@
           loginPage.style.display = "none";
           mostraElementiPrincipali();
           showSuccessToast("Accesso effettuato con successo!");
-          caricaDati().then(() => {
-            inizializzaSincronizzazioneRealTime();
-            btnNuovoCliente.click();
-          });
+          inizializzaSincronizzazioneRealTime();
+          btnNuovoCliente.click();
         })
         .catch((error) => {
           showErrorToast("Credenziali non valide. Riprova.");
@@ -1569,6 +1567,10 @@
       if (user) {
         loginPage.style.display = "none";
         mostraElementiPrincipali();
+        caricaDati().then(() => {
+          inizializzaSincronizzazioneRealTime();
+          aggiornaContatori();
+        });
       } else {
         nascondiElementiPrincipali();
         loginPage.style.display = "block";
@@ -1601,148 +1603,27 @@
     }
 
     function aggiornaContenuto() {
-      return caricaDati()
-        .then(() => {
-          aggiornaListaClientiDaPianificare();
-          aggiornaInterventiInCorso();
-          aggiornaInterventiCompletati();
-          aggiornaRubrica();
-          aggiornaListaNote();
-          aggiornaCalendario();
-          return aggiornaContatori();
-        })
-        .catch((error) => {
-          showErrorToast("Errore nell'aggiornamento dei dati: " + error);
-        });
-    }
-
-    function caricaDati() {
-      return Promise.all([
-        db.ref(`${APP_ID}/interventi`).once("value"),
-        db.ref(`${APP_ID}/rubrica`).once("value")
-      ]).then(([interventiSnapshot, rubricaSnapshot]) => {
-        console.log("Dati interventi:", interventiSnapshot.val());
-        console.log("Dati rubrica:", rubricaSnapshot.val());
-
-        const interventi = interventiSnapshot.val() || {};
-        const contatti = rubricaSnapshot.val() || [];
-
-        // Funzione helper per popolare le tabelle
-        function popolaTabella(tabella, dati, tipo) {
-          tabella.innerHTML = "";
-          if (Array.isArray(dati)) {
-            // Ordina gli interventi per data se necessario
-            if (tipo === "inCorso" || tipo === "completati") {
-              dati.sort((a, b) => {
-                const dataA = new Date(a.appuntamento.split(" ")[0].split(".").reverse().join("-") + "T" + (a.appuntamento.split(" ")[1] || "00:00"));
-                const dataB = new Date(b.appuntamento.split(" ")[0].split(".").reverse().join("-") + "T" + (b.appuntamento.split(" ")[1] || "00:00"));
-                return dataB - dataA; // Ordine decrescente
-              });
-            }
-            dati.forEach((item, index) => {
-              if (tipo === "completati" && index >= 50) {
-                // Limita a 50 interventi completati visualizzati
-                return;
-              }
-              aggiungiRigaTabella(tabella, item, tipo);
-            });
-          } else {
-            console.warn(`I dati per ${tipo} non sono un array:`, dati);
-          }
-        }
-
-        // Popola le tabelle
-        popolaTabella(tabellaClienti, interventi.daPianificare, "daPianificare");
-        popolaTabella(tabellaInterventiInCorso, interventi.inCorso, "inCorso");
-        popolaTabella(tabellaInterventiCompletati, interventi.completati, "completati");
-        popolaTabella(tabellaCestino, interventi.cestino, "cestino");
-
-        // Popola la rubrica
-        tabellaRubrica.innerHTML = "";
-        if (Array.isArray(contatti)) {
-          contatti.sort((a, b) => a.cliente.localeCompare(b.cliente));
-          contatti.forEach(contatto => aggiungiRigaRubrica(contatto));
-        } else {
-          console.warn("I dati della rubrica non sono un array:", contatti);
-        }
-
-        return aggiornaContatori();
-      }).catch(error => {
-        console.error("Errore nel caricamento dei dati:", error);
-        showErrorToast("Errore nel caricamento dei dati: " + error.message);
-      });
-    }
-
-    function salvaDati() {
-      const interventi = {
-        daPianificare: Array.from(tabellaClienti.rows).map((row) => ({
-          cliente: row.cells[0].textContent,
-          indirizzo: row.cells[1].textContent,
-          titolo: row.cells[2].textContent,
-          tipoIntervento: row.cells[3].textContent,
-          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
-        })),
-        inCorso: Array.from(tabellaInterventiInCorso.rows).map((row) => ({
-          cliente: row.cells[0].textContent,
-          indirizzo: row.cells[1].textContent,
-          titolo: row.cells[2].textContent,
-          tipoIntervento: row.cells[3].textContent,
-          appuntamento: row.cells[4].textContent,
-          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
-        })),
-        completati: Array.from(tabellaInterventiCompletati.rows).map((row) => ({
-          cliente: row.cells[0].textContent,
-          indirizzo: row.cells[1].textContent,
-          titolo: row.cells[2].textContent,
-          tipoIntervento: row.cells[3].textContent,
-          appuntamento: row.cells[4].textContent,
-          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
-          collaudoUrl: row.dataset.collaudoUrl || "",
-        })),
-        cestino: Array.from(tabellaCestino.rows).map((row) => ({
-          cliente: row.cells[0].textContent,
-          indirizzo: row.cells[1].textContent,
-          titolo: row.cells[2].textContent,
-          tipoIntervento: row.cells[3].textContent,
-          appuntamento: row.cells[4].textContent,
-          priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
-        })),
-      };
-
-      const contatti = Array.from(tabellaRubrica.rows).map((row) => ({
-        cliente: row.cells[0].textContent,
-        indirizzo: row.cells[1].textContent,
-        titolo: row.cells[2].textContent,
-        priorita: row.cells[0].querySelector("div")?.style.backgroundColor || "",
-      }));
-
-      return Promise.all([
-        db.ref(`${APP_ID}/interventi`).set(interventi),
-        db.ref(`${APP_ID}/rubrica`).set(contatti),
-      ]).then(() => {
-        console.log("Dati salvati con successo");
-        return aggiornaContatori();
-      });
+      aggiornaListaClientiDaPianificare();
+      aggiornaInterventiInCorso();
+      aggiornaInterventiCompletati();
+      aggiornaCalendario();
+      return aggiornaContatori();
     }
 
     function inizializzaSincronizzazioneRealTime() {
       db.ref(`${APP_ID}/interventi`).on("value", (snapshot) => {
         console.log("Dati interventi aggiornati:", snapshot.val());
-        caricaDati().then(() => {
-          aggiornaListaClientiDaPianificare();
-          aggiornaInterventiInCorso();
-          aggiornaInterventiCompletati();
-          aggiornaRubrica();
-          aggiornaCalendario();
-          aggiornaContatori();
-        });
+        aggiornaContenuto();
       });
 
       db.ref(`${APP_ID}/rubrica`).on("value", (snapshot) => {
         console.log("Dati rubrica aggiornati:", snapshot.val());
-        caricaDati().then(() => {
-          aggiornaRubrica();
-        });
+        aggiornaRubrica();
+      });
+
+      db.ref(`${APP_ID}/note`).on("value", (snapshot) => {
+        console.log("Dati note aggiornati:", snapshot.val());
+        aggiornaListaNote();
       });
     }
 
@@ -1865,23 +1746,23 @@
     function aggiungiRigaTabella(tabella, intervento, tipo) {
       const newRow = tabella.insertRow();
       newRow.innerHTML = `
-        <td data-label="Cliente">${intervento.cliente}</td>
-        <td data-label="Indirizzo">${intervento.indirizzo}</td>
-        <td data-label="Titolo">${intervento.titolo}</td>
-        <td data-label="Tipo Intervento">${intervento.tipoIntervento}</td>
-        ${tipo !== "daPianificare" ? `<td data-label="Appuntamento">${intervento.appuntamento || ""}</td>` : ""}
-        <td data-label="Azioni">
-          <div class="azioni-intervento">
-            ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>' : ""}
-            ${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>' : ""}
-            ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
-            ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i></button>' : ""}
-            ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
-            ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i></button>' : ""}
-          </div>
-        </td>
-      `;
+    <td data-label="Cliente">${intervento.cliente}</td>
+    <td data-label="Indirizzo">${intervento.indirizzo}</td>
+    <td data-label="Titolo">${intervento.titolo}</td>
+    <td data-label="Tipo Intervento">${intervento.tipoIntervento}</td>
+    ${tipo !== "daPianificare" ? `<td data-label="Appuntamento">${intervento.appuntamento || ""}</td>` : ""}
+    <td data-label="Azioni">
+      <div class="azioni-intervento">
+        ${tipo === "daPianificare" ? '<button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>' : ""}
+${tipo === "daPianificare" ? '<button onclick="pianificaAppuntamento(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>' : ""}
+        ${tipo === "inCorso" ? '<button onclick="apriModalCollaudo(this)" class="btn-collaudo">Collaudo</button>' : ""}
+        ${tipo === "completati" ? '<button onclick="visualizzaCollaudo(this)" class="btn-pdf"><i class="fas fa-file-pdf"></i></button>' : ""}
+        ${tipo === "daPianificare" || tipo === "inCorso" ? '<button onclick="eliminaIntervento(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="ripristinaIntervento(this)" class="btn-ripristina">Ripristina</button>' : ""}
+        ${tipo === "cestino" ? '<button onclick="eliminaDefinitivamente(this)" class="btn-elimina"><i class="fas fa-trash"></i></button>' : ""}
+      </div>
+    </td>
+  `;
 
       // Aggiungi l'URL del collaudo come attributo data alla riga
       if (intervento.collaudoUrl) {
@@ -1905,17 +1786,17 @@
     function aggiungiRigaRubrica(contatto) {
       const newRow = tabellaRubrica.insertRow();
       newRow.innerHTML = `
-        <td data-label="Cliente">${contatto.cliente}</td>
-        <td data-label="Indirizzo">${contatto.indirizzo}</td>
-        <td data-label="Titolo">${contatto.titolo}</td>
-        <td data-label="Azioni">
-          <div class="azioni-intervento">
-            <button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>
-            <button onclick="pianificaInterventoRubrica(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>
-            <button onclick="eliminaContattoRubrica(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>
-          </div>
-        </td>
-      `;
+    <td data-label="Cliente">${contatto.cliente}</td>
+    <td data-label="Indirizzo">${contatto.indirizzo}</td>
+    <td data-label="Titolo">${contatto.titolo}</td>
+    <td data-label="Azioni">
+      <div class="azioni-intervento">
+        <button onclick="apriModalModifica(this)" class="btn-modifica"><i class="fas fa-pencil-alt"></i></button>
+        <button onclick="pianificaInterventoRubrica(this)" class="btn-pianifica"><i class="fas fa-calendar-plus"></i></button>
+        <button onclick="eliminaContattoRubrica(this)" class="btn-elimina"><i class="fas fa-trash-alt"></i></button>
+      </div>
+    </td>
+  `;
       // Aggiungi l'indicatore di priorità se presente
       if (contatto.priorita) {
         const prioritaIndicator = document.createElement("div");
@@ -1940,12 +1821,14 @@
         priorita: document.getElementById("priorita").value,
       };
 
-      aggiungiRigaTabella(tabellaClienti, nuovoCliente, "daPianificare");
-      aggiungiRigaRubrica(nuovoCliente);
-
-      interventoForm.reset();
-      salvaDati()
-        .then(() => showSuccessToast("Nuovo cliente aggiunto e salvato con successo!"))
+      db.ref(`${APP_ID}/interventi/daPianificare`).push(nuovoCliente)
+        .then(() => {
+          db.ref(`${APP_ID}/rubrica`).push(nuovoCliente);
+        })
+        .then(() => {
+          interventoForm.reset();
+          showSuccessToast("Nuovo cliente aggiunto e salvato con successo!");
+        })
         .catch((error) => showErrorToast("Errore nel salvataggio del nuovo cliente: " + error));
     });
 
@@ -1976,14 +1859,15 @@
         priorita: clienteSelezionato.cells[0].querySelector("div")?.style.backgroundColor || "",
       };
 
-      aggiungiRigaTabella(tabellaInterventiInCorso, interventoInCorso, "inCorso");
+      const key = clienteSelezionato.dataset.key;
 
-      clienteSelezionato.remove();
-      document.getElementById("modalAppuntamento").style.display = "none";
-      formAppuntamento.reset();
-
-      salvaDati()
-        .then(() => showSuccessToast("Appuntamento pianificato e salvato con successo!"))
+      db.ref(`${APP_ID}/interventi/daPianificare/${key}`).remove()
+        .then(() => db.ref(`${APP_ID}/interventi/inCorso`).push(interventoInCorso))
+        .then(() => {
+          document.getElementById("modalAppuntamento").style.display = "none";
+          formAppuntamento.reset();
+          showSuccessToast("Appuntamento pianificato e salvato con successo!");
+        })
         .catch((error) => showErrorToast("Errore nel salvataggio dell'appuntamento: " + error));
     });
 
@@ -2131,12 +2015,12 @@
         loadImage(FIRMA_ALIN_URL).catch(() => null)
       ]).then(([logo1, logo2, firmaAlin]) => {
         // Aggiungi i loghi
-        if (logo1) pdf.addImage(logo1, "PNG", 5, 10, 50, 40); // Spostato a destra di 10 unità
+        if (logo1) pdf.addImage(logo1, "PNG", 5, 10, 50, 40);
         if (logo2) pdf.addImage(logo2, "JPEG", 150, 10, 50, 40);
 
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(18);
-        pdf.setTextColor(0); // Cambiato a nero
+        pdf.setTextColor(0);
         pdf.text("ATTESTAZIONE DI COLLAUDO", 105, 40, null, null, "center");
 
         pdf.setTextColor(0);
@@ -2206,10 +2090,10 @@
               collaudoUrl: downloadURL,
             };
 
-            aggiungiRigaTabella(tabellaInterventiCompletati, interventoCompletato, "completati");
-            clienteSelezionato.remove();
+            const key = clienteSelezionato.dataset.key;
 
-            return salvaDati();
+            return db.ref(`${APP_ID}/interventi/inCorso/${key}`).remove()
+              .then(() => db.ref(`${APP_ID}/interventi/completati`).push(interventoCompletato));
           })
           .then(() => {
             showSuccessToast("Intervento completato e documento di collaudo salvato con successo!");
@@ -2241,6 +2125,9 @@
     function eliminaIntervento(button) {
       if (confirm("Sei sicuro di voler spostare questo intervento nel cestino?")) {
         const elemento = button.closest("tr");
+        const key = elemento.dataset.key;
+        const tipo = elemento.parentElement.id === "tabellaClienti" ? "daPianificare" : "inCorso";
+
         const intervento = {
           cliente: elemento.cells[0].textContent,
           indirizzo: elemento.cells[1].textContent,
@@ -2250,17 +2137,19 @@
           priorita: elemento.cells[0].querySelector("div")?.style.backgroundColor || "",
         };
 
-        aggiungiRigaTabella(tabellaCestino, intervento, "cestino");
-
-        elemento.remove();
-        salvaDati()
-          .then(() => showSuccessToast("Intervento spostato nel cestino"))
+        db.ref(`${APP_ID}/interventi/${tipo}/${key}`).remove()
+          .then(() => db.ref(`${APP_ID}/interventi/cestino`).push(intervento))
+          .then(() => {
+            showSuccessToast("Intervento spostato nel cestino");
+          })
           .catch((error) => showErrorToast("Errore nello spostamento dell'intervento nel cestino: " + error));
       }
     }
 
     function ripristinaIntervento(button) {
       const elemento = button.closest("tr");
+      const key = elemento.dataset.key;
+
       const item = {
         cliente: elemento.cells[0].textContent,
         indirizzo: elemento.cells[1].textContent,
@@ -2271,33 +2160,42 @@
 
       if (item.tipoIntervento === "Contatto Rubrica") {
         // Se è un contatto della rubrica, ripristinalo nella rubrica
-        aggiungiRigaRubrica(item);
+        db.ref(`${APP_ID}/interventi/cestino/${key}`).remove()
+          .then(() => db.ref(`${APP_ID}/rubrica`).push(item))
+          .then(() => {
+            showSuccessToast("Contatto ripristinato nella rubrica");
+          })
+          .catch((error) => showErrorToast("Errore nel ripristino: " + error));
       } else {
         // Se è un intervento, ripristinalo in "Pianifica"
-        aggiungiRigaTabella(tabellaClienti, item, "daPianificare");
+        db.ref(`${APP_ID}/interventi/cestino/${key}`).remove()
+          .then(() => db.ref(`${APP_ID}/interventi/daPianificare`).push(item))
+          .then(() => {
+            showSuccessToast("Intervento ripristinato e da pianificare");
+          })
+          .catch((error) => showErrorToast("Errore nel ripristino: " + error));
       }
-
-      elemento.remove();
-      salvaDati()
-        .then(() => showSuccessToast(item.tipoIntervento === "Contatto Rubrica" ? "Contatto ripristinato nella rubrica" : "Intervento ripristinato e da pianificare"))
-        .catch((error) => showErrorToast("Errore nel ripristino: " + error));
     }
 
     function eliminaDefinitivamente(button) {
       if (confirm("Sei sicuro di voler eliminare definitivamente questo intervento?")) {
         const elemento = button.closest("tr");
-        elemento.remove();
-        salvaDati()
-          .then(() => showSuccessToast("Intervento eliminato definitivamente"))
+        const key = elemento.dataset.key;
+
+        db.ref(`${APP_ID}/interventi/cestino/${key}`).remove()
+          .then(() => {
+            showSuccessToast("Intervento eliminato definitivamente");
+          })
           .catch((error) => showErrorToast("Errore nell'eliminazione definitiva dell'intervento: " + error));
       }
     }
 
     svuotaCestino.addEventListener("click", () => {
       if (confirm("Sei sicuro di voler svuotare il cestino? Questa azione è irreversibile.")) {
-        tabellaCestino.innerHTML = "";
-        salvaDati()
-          .then(() => showSuccessToast("Cestino svuotato"))
+        db.ref(`${APP_ID}/interventi/cestino`).remove()
+          .then(() => {
+            showSuccessToast("Cestino svuotato");
+          })
           .catch((error) => showErrorToast("Errore nello svuotamento del cestino: " + error));
       }
     });
@@ -2305,6 +2203,8 @@
     // Funzioni per la rubrica
     function pianificaInterventoRubrica(button) {
       const elemento = button.closest("tr");
+      const key = elemento.dataset.key;
+
       const nuovoIntervento = {
         cliente: elemento.cells[0].textContent,
         indirizzo: elemento.cells[1].textContent,
@@ -2313,16 +2213,18 @@
         priorita: elemento.cells[0].querySelector("div")?.style.backgroundColor || "",
       };
 
-      aggiungiRigaTabella(tabellaClienti, nuovoIntervento, "daPianificare");
-
-      salvaDati()
-        .then(() => showSuccessToast("Intervento aggiunto alla lista da pianificare"))
+      db.ref(`${APP_ID}/interventi/daPianificare`).push(nuovoIntervento)
+        .then(() => {
+          showSuccessToast("Intervento aggiunto alla lista da pianificare");
+        })
         .catch((error) => showErrorToast("Errore nell'aggiunta dell'intervento da pianificare: " + error));
     }
 
     function eliminaContattoRubrica(button) {
       if (confirm("Sei sicuro di voler eliminare questo contatto dalla rubrica?")) {
         const elemento = button.closest("tr");
+        const key = elemento.dataset.key;
+
         const contatto = {
           cliente: elemento.cells[0].textContent,
           indirizzo: elemento.cells[1].textContent,
@@ -2330,11 +2232,12 @@
           tipoIntervento: "Contatto Rubrica",
           priorita: elemento.cells[0].querySelector("div")?.style.backgroundColor || "",
         };
-        aggiungiRigaTabella(tabellaCestino, contatto, "cestino");
 
-        elemento.remove();
-        salvaDati()
-          .then(() => showSuccessToast("Contatto eliminato dalla rubrica e spostato nel cestino"))
+        db.ref(`${APP_ID}/rubrica/${key}`).remove()
+          .then(() => db.ref(`${APP_ID}/interventi/cestino`).push(contatto))
+          .then(() => {
+            showSuccessToast("Contatto eliminato dalla rubrica e spostato nel cestino");
+          })
           .catch((error) => showErrorToast("Errore nell'eliminazione del contatto dalla rubrica: " + error));
       }
     }
@@ -2372,40 +2275,46 @@
       }
 
       // Recupera gli interventi in corso
-      const interventiInCorso = Array.from(tabellaInterventiInCorso.rows).map((row) => ({
-        cliente: row.cells[0].textContent,
-        titolo: row.cells[2].textContent,
-        appuntamento: row.cells[4].textContent,
-      }));
-
-      // Aggiungi i giorni del mese
-      for (let giorno = 1; giorno <= ultimoGiornoMese.getDate(); giorno++) {
-        const giornoElement = document.createElement("div");
-        giornoElement.className = "calendario-giorno";
-        giornoElement.textContent = giorno;
-
-        const dataGiorno = new Date(meseCorrente.getFullYear(), meseCorrente.getMonth(), giorno);
-        const interventiGiorno = interventiInCorso.filter((intervento) => {
-          const dataIntervento = new Date(intervento.appuntamento.split(" ")[0].split(".").reverse().join("-"));
-          return dataIntervento.toDateString() === dataGiorno.toDateString();
+      db.ref(`${APP_ID}/interventi/inCorso`).once("value", (snapshot) => {
+        const interventiInCorso = [];
+        snapshot.forEach((childSnapshot) => {
+          const intervento = childSnapshot.val();
+          interventiInCorso.push({
+            cliente: intervento.cliente,
+            titolo: intervento.titolo,
+            appuntamento: intervento.appuntamento,
+          });
         });
 
-        if (interventiGiorno.length > 0) {
-          giornoElement.classList.add("con-eventi");
+        // Aggiungi i giorni del mese
+        for (let giorno = 1; giorno <= ultimoGiornoMese.getDate(); giorno++) {
+          const giornoElement = document.createElement("div");
+          giornoElement.className = "calendario-giorno";
+          giornoElement.textContent = giorno;
+
+          const dataGiorno = new Date(meseCorrente.getFullYear(), meseCorrente.getMonth(), giorno);
+          const interventiGiorno = interventiInCorso.filter((intervento) => {
+            const dataIntervento = new Date(intervento.appuntamento.split(" ")[0].split(".").reverse().join("-"));
+            return dataIntervento.toDateString() === dataGiorno.toDateString();
+          });
+
+          if (interventiGiorno.length > 0) {
+            giornoElement.classList.add("con-eventi");
+          }
+
+          if (dataGiorno.toDateString() === new Date().toDateString()) {
+            giornoElement.classList.add("oggi");
+          }
+
+          giornoElement.addEventListener("click", () => {
+            document.querySelectorAll(".calendario-giorno").forEach((el) => el.classList.remove("selezionato"));
+            giornoElement.classList.add("selezionato");
+            mostraEventiGiorno(dataGiorno, interventiGiorno);
+          });
+
+          calendario.appendChild(giornoElement);
         }
-
-        if (dataGiorno.toDateString() === new Date().toDateString()) {
-          giornoElement.classList.add("oggi");
-        }
-
-        giornoElement.addEventListener("click", () => {
-          document.querySelectorAll(".calendario-giorno").forEach((el) => el.classList.remove("selezionato"));
-          giornoElement.classList.add("selezionato");
-          mostraEventiGiorno(dataGiorno, interventiGiorno);
-        });
-
-        calendario.appendChild(giornoElement);
-      }
+      });
     }
 
     function mostraEventiGiorno(data, eventi) {
@@ -2446,38 +2355,67 @@
 
     // Funzioni per aggiornare le liste
     function aggiornaListaClientiDaPianificare() {
-      // I dati sono già caricati in caricaDati()
+      db.ref(`${APP_ID}/interventi/daPianificare`).once("value", (snapshot) => {
+        tabellaClienti.innerHTML = "";
+        snapshot.forEach((childSnapshot) => {
+          const intervento = childSnapshot.val();
+          const key = childSnapshot.key;
+          aggiungiRigaTabella(tabellaClienti, intervento, "daPianificare", key);
+        });
+      });
     }
 
     function aggiornaInterventiInCorso() {
-      // I dati sono già caricati in caricaDati()
+      db.ref(`${APP_ID}/interventi/inCorso`).once("value", (snapshot) => {
+        tabellaInterventiInCorso.innerHTML = "";
+        snapshot.forEach((childSnapshot) => {
+          const intervento = childSnapshot.val();
+          const key = childSnapshot.key;
+          aggiungiRigaTabella(tabellaInterventiInCorso, intervento, "inCorso", key);
+        });
+      });
     }
 
     function aggiornaInterventiCompletati() {
-      // I dati sono già caricati in caricaDati()
+      db.ref(`${APP_ID}/interventi/completati`).once("value", (snapshot) => {
+        tabellaInterventiCompletati.innerHTML = "";
+        snapshot.forEach((childSnapshot) => {
+          const intervento = childSnapshot.val();
+          const key = childSnapshot.key;
+          aggiungiRigaTabella(tabellaInterventiCompletati, intervento, "completati", key);
+        });
+      });
     }
 
     function aggiornaRubrica() {
-      // I dati sono già caricati in caricaDati()
+      db.ref(`${APP_ID}/rubrica`).once("value", (snapshot) => {
+        tabellaRubrica.innerHTML = "";
+        snapshot.forEach((childSnapshot) => {
+          const contatto = childSnapshot.val();
+          const key = childSnapshot.key;
+          aggiungiRigaRubrica(contatto, key);
+        });
+      });
     }
 
     // Funzioni per la gestione delle note
     function aggiornaListaNote() {
       db.ref(`${APP_ID}/note`).once("value", (snapshot) => {
-        const note = snapshot.val() || [];
         elencoNote.innerHTML = "";
-        note.forEach((nota, index) => {
+        snapshot.forEach((childSnapshot) => {
+          const nota = childSnapshot.val();
+          const key = childSnapshot.key;
           const notaElement = document.createElement("div");
           notaElement.className = "nota";
           notaElement.innerHTML = `
-            <h3>${nota.titolo}</h3>
-            <p>${nota.contenuto.substring(0, 100)}${nota.contenuto.length > 100 ? "..." : ""}</p>
-            <small>Creata il: ${new Date(nota.data).toLocaleString()}</small>
-            <div class="azioni-nota">
-              <button onclick="modificaNota(${index})" class="btn-modifica">Modifica</button>
-              <button onclick="eliminaNota(${index})" class="btn-elimina">Elimina</button>
-            </div>
-          `;
+        <h3>${nota.titolo}</h3>
+        <p>${nota.contenuto.substring(0, 100)}${nota.contenuto.length > 100 ? "..." : ""}</p>
+        <small>Creata il: ${new Date(nota.data).toLocaleString()}</small>
+        <div class="azioni-nota">
+          <button onclick="modificaNota('${key}')" class="btn-modifica">Modifica</button>
+          <button onclick="eliminaNota('${key}')" class="btn-elimina">Elimina</button>
+        </div>
+      `;
           elencoNote.appendChild(notaElement);
         });
       });
@@ -2494,16 +2432,26 @@
       const titolo = titoloNota.value;
       const contenuto = contenutoNota.value;
       if (titolo && contenuto) {
-        db.ref(`${APP_ID}/note`).once("value", (snapshot) => {
-          let note = snapshot.val() || [];
-          if (notaSelezionata !== null) {
-            // Modifica nota esistente
-            note[notaSelezionata] = { titolo, contenuto, data: new Date().toISOString() };
-          } else {
-            // Aggiungi nuova nota
-            note.push({ titolo, contenuto, data: new Date().toISOString() });
-          }
-          db.ref(`${APP_ID}/note`).set(note)
+        const nuovaNota = {
+          titolo,
+          contenuto,
+          data: new Date().toISOString()
+        };
+
+        if (notaSelezionata) {
+          // Modifica nota esistente
+          db.ref(`${APP_ID}/note/${notaSelezionata}`).update(nuovaNota)
+            .then(() => {
+              modalNuovaNota.style.display = "none";
+              aggiornaListaNote();
+              showSuccessToast("Nota aggiornata con successo");
+            })
+            .catch((error) => {
+              showErrorToast("Si è verificato un errore durante l'aggiornamento della nota: " + error);
+            });
+        } else {
+          // Aggiungi nuova nota
+          db.ref(`${APP_ID}/note`).push(nuovaNota)
             .then(() => {
               modalNuovaNota.style.display = "none";
               aggiornaListaNote();
@@ -2512,7 +2460,7 @@
             .catch((error) => {
               showErrorToast("Si è verificato un errore durante il salvataggio della nota: " + error);
             });
-        });
+        }
       } else {
         showErrorToast("Per favore, inserisci sia il titolo che il contenuto della nota");
       }
@@ -2522,19 +2470,19 @@
       modalNuovaNota.style.display = "none";
     });
 
-    function modificaNota(index) {
-      db.ref(`${APP_ID}/note/${index}`).once("value", (snapshot) => {
+    function modificaNota(key) {
+      db.ref(`${APP_ID}/note/${key}`).once("value", (snapshot) => {
         const nota = snapshot.val();
         titoloNota.value = nota.titolo;
         contenutoNota.value = nota.contenuto;
-        notaSelezionata = index;
+        notaSelezionata = key;
         modalNuovaNota.style.display = "block";
       });
     }
 
-    function eliminaNota(index) {
+    function eliminaNota(key) {
       if (confirm("Sei sicuro di voler eliminare questa nota?")) {
-        db.ref(`${APP_ID}/note/${index}`).remove()
+        db.ref(`${APP_ID}/note/${key}`).remove()
           .then(() => {
             aggiornaListaNote();
             showSuccessToast("Nota eliminata");
@@ -2579,35 +2527,30 @@
 
     formModifica.addEventListener("submit", (e) => {
       e.preventDefault();
-      clienteSelezionato.cells[0].textContent = document.getElementById("modCliente").value;
-      clienteSelezionato.cells[1].textContent = document.getElementById("modIndirizzo").value;
-      clienteSelezionato.cells[2].textContent = document.getElementById("modTitolo").value;
+      const key = clienteSelezionato.dataset.key;
+      const tipo = clienteSelezionato.closest("table").id === "tabellaRubrica" ? "rubrica" : "interventi/daPianificare";
 
-      if (clienteSelezionato.cells[3]) {
-        clienteSelezionato.cells[3].textContent = document.getElementById("modTipoIntervento").value;
+      const datiModificati = {
+        cliente: document.getElementById("modCliente").value,
+        indirizzo: document.getElementById("modIndirizzo").value,
+        titolo: document.getElementById("modTitolo").value,
+        priorita: document.getElementById("modPriorita").value,
+      };
+
+      if (tipo !== "rubrica") {
+        datiModificati.tipoIntervento = document.getElementById("modTipoIntervento").value;
       }
 
-      // Aggiorna la priorità
-      const nuovaPriorita = document.getElementById("modPriorita").value;
-      let prioritaIndicator = clienteSelezionato.cells[0].querySelector("div");
-      if (nuovaPriorita) {
-        if (!prioritaIndicator) {
-          prioritaIndicator = document.createElement("div");
-          prioritaIndicator.style.width = "10px";
-          prioritaIndicator.style.height = "10px";
-          prioritaIndicator.style.borderRadius = "50%";
-          prioritaIndicator.style.display = "inline-block";
-          prioritaIndicator.style.marginRight = "5px";
-          clienteSelezionato.cells[0].insertBefore(prioritaIndicator, clienteSelezionato.cells[0].firstChild);
-        }
-        prioritaIndicator.style.backgroundColor = nuovaPriorita;
-      } else if (prioritaIndicator) {
-        prioritaIndicator.remove();
-      }
-
-      modalModifica.style.display = "none";
-      salvaDati()
-        .then(() => showSuccessToast("Modifiche salvate con successo"))
+      db.ref(`${APP_ID}/${tipo}/${key}`).update(datiModificati)
+        .then(() => {
+          modalModifica.style.display = "none";
+          showSuccessToast("Modifiche salvate con successo");
+          if (tipo === "rubrica") {
+            aggiornaRubrica();
+          } else {
+            aggiornaListaClientiDaPianificare();
+          }
+        })
         .catch((error) => showErrorToast("Errore nel salvataggio delle modifiche: " + error));
     });
 
@@ -2693,6 +2636,8 @@
       });
     });
 
+    // Inizializza la sincronizzazione in tempo reale
+    inizializzaSincronizzazioneRealTime();
   </script>
 </body>
 
