@@ -687,6 +687,23 @@
       background-color: #27ae60;
     }
 
+    .mobile .sidebar {
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(-100%);
+    }
+
+    .mobile .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .mobile .main-content {
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    .mobile .sidebar.open+.main-content {
+      margin-left: var(--sidebar-width);
+    }
+
     /* Stili generali per mobile */
     .mobile body {
       font-size: 16px;
@@ -2448,9 +2465,30 @@
     document.addEventListener('DOMContentLoaded', function () {
       const menuToggle = document.getElementById('menuToggle');
       const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
 
-      menuToggle.addEventListener('click', function () {
+      menuToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
         sidebar.classList.toggle('open');
+      });
+
+      // Chiudi il menu quando si clicca su un elemento della sidebar
+      sidebar.addEventListener('click', function (e) {
+        if (e.target.tagName === 'BUTTON') {
+          sidebar.classList.remove('open');
+        }
+      });
+
+      // Chiudi il menu quando si clicca fuori dalla sidebar
+      document.addEventListener('click', function (e) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+          sidebar.classList.remove('open');
+        }
+      });
+
+      // Previeni la chiusura del menu quando si clicca all'interno della sidebar
+      sidebar.addEventListener('click', function (e) {
+        e.stopPropagation();
       });
     });
 
