@@ -538,6 +538,7 @@
       padding: 0;
     }
 
+    #listaEventi li,
     #listaEventiGiorno li {
       margin-bottom: 5px;
       padding: 5px;
@@ -748,29 +749,18 @@
     .mobile .sidebar {
       transition: transform 0.3s ease-in-out;
       transform: translateX(-100%);
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 80%;
-      max-width: 300px;
-      z-index: 1000;
-      padding-top: 60px;
-      overflow-y: auto;
     }
 
     .mobile .sidebar.open {
       transform: translateX(0);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
 
     .mobile .main-content {
       transition: margin-left 0.3s ease-in-out;
-      margin-left: 0;
     }
 
     .mobile .sidebar.open+.main-content {
-      margin-left: 0;
+      margin-left: var(--sidebar-width);
     }
 
     /* Stili generali per mobile */
@@ -831,20 +821,21 @@
     }
 
     /* Sidebar per mobile */
-    .mobile .nav-buttons {
-      display: flex;
-      flex-direction: column;
-      height: calc(100% - 60px);
-      justify-content: space-between;
+    .mobile .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 80%;
+      max-width: 300px;
+      z-index: 1000;
+      padding-top: 60px;
     }
 
-    .mobile .nav-buttons button {
-      padding: 10px 15px;
-      font-size: 0.9em;
-    }
-
-    .mobile .nav-buttons button:last-child {
-      margin-top: auto;
+    .mobile .sidebar.open {
+      transform: translateX(0);
     }
 
     /* Stili per le card degli interventi su mobile */
@@ -954,44 +945,37 @@
       font-size: 1.2em;
     }
 
-    /* Nuove modifiche */
     .close-btn {
       position: absolute;
       right: 10px;
       top: 10px;
       font-size: 24px;
-      background: none;
+      background-color: transparent;
       border: none;
+      color: #333;
       cursor: pointer;
+      z-index: 1000;
+      padding: 5px 10px;
+    }
+
+    .close-btn:hover {
+      color: #f00;
+    }
+
+    .modal-collaudo {
+      position: relative;
+      padding-top: 40px;
     }
 
     @media (max-width: 768px) {
-      .main-content {
-        margin-top: 60px;
-        /* Altezza dell'header mobile */
-      }
-
-      .container {
-        margin-top: 20px;
-      }
-
-      .modal-content {
-        margin-top: 70px;
+      .close-btn {
+        top: 5px;
+        right: 5px;
+        font-size: 20px;
       }
 
       .modal-collaudo {
-        margin-top: 70px;
-      }
-
-      .mobile .sidebar {
-        top: 60px;
-        /* Altezza dell'header mobile */
-        height: calc(100vh - 60px);
-        overflow-y: auto;
-      }
-
-      #modalCollaudo .modal-content {
-        margin-top: 70px;
+        padding-top: 30px;
       }
     }
   </style>
@@ -1929,6 +1913,10 @@
     collaudoForm.addEventListener("submit", (e) => {
       e.preventDefault();
       generaDocumentoCollaudo();
+    });
+
+    document.getElementById('chiudiCollaudo').addEventListener('click', function () {
+      document.getElementById('modalCollaudo').style.display = 'none';
     });
 
     function generaDocumentoCollaudo() {
