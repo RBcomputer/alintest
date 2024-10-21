@@ -771,6 +771,8 @@
     .mobile .main-content {
       margin-left: 0;
       padding: 10px;
+      padding-top: 60px;
+      /* Aggiunto per spostare il contenuto verso il basso */
     }
 
     /* Header mobile e menu hamburger */
@@ -825,13 +827,16 @@
       transform: translateX(-100%);
       transition: transform 0.3s ease-in-out;
       position: fixed;
-      top: 0;
+      top: 50px;
+      /* Modificato per lasciare spazio all'header */
       left: 0;
-      height: 100vh;
+      height: calc(100vh - 50px);
+      /* Modificato per evitare sovrapposizioni */
       width: 80%;
       max-width: 300px;
       z-index: 1000;
-      padding-top: 60px;
+      padding-top: 10px;
+      /* Ridotto il padding */
     }
 
     .mobile .sidebar.open {
@@ -842,6 +847,8 @@
     .mobile .container {
       padding: 15px;
       margin-bottom: 15px;
+      margin-top: 20px;
+      /* Aggiunto per spaziare le card */
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
@@ -919,7 +926,8 @@
     .mobile .modal-content {
       width: 95%;
       max-width: none;
-      margin: 20px auto;
+      margin: 60px auto 20px;
+      /* Modificato per spostare i modali verso il basso */
     }
 
     #modalAppuntamento .modal-content {
@@ -976,6 +984,10 @@
 
       .modal-collaudo {
         padding-top: 30px;
+      }
+
+      .container:last-child {
+        margin-bottom: 60px;
       }
     }
   </style>
@@ -1316,7 +1328,7 @@
 
   <div class="copyright">
     Gestionale Clienti per AlinSystem - Roberto Bonifazi Copyright © 2024
-    vbeta0.2.1
+    vbeta0.2.3 me sò rotto er cazzo
   </div>
 
   <script>
