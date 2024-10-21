@@ -350,7 +350,7 @@
       align-items: center;
       background-color: var(--background-color);
       z-index: 1000;
-      padding-bottom: 40px;
+      padding-bottom: 60px;
     }
 
     .login-box {
@@ -608,8 +608,6 @@
       background-color: #f9f9f9;
       border-radius: 10px;
       padding: 30px;
-      margin-top: 80px;
-      /* Aggiungi questa riga */
     }
 
     .modal-collaudo h2 {
@@ -701,12 +699,6 @@
       background-color: #27ae60;
     }
 
-    @media (max-width: 768px) {
-      .modal-collaudo {
-        margin-top: 80px;
-      }
-    }
-
     .mobile .sidebar {
       transition: transform 0.3s ease-in-out;
       transform: translateX(-100%);
@@ -740,7 +732,8 @@
       background-color: var(--primary-color);
       padding: 10px;
       position: fixed;
-      top: 0;
+      bottom: 0;
+      /* Cambiato da top: 0 a bottom: 0 */
       left: 0;
       right: 0;
       z-index: 1000;
